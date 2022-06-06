@@ -2,9 +2,10 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:take_home_project/controller/price_controller.dart';
+import 'package:take_home_project/controller/data_controller.dart';
 import 'package:take_home_project/model/weight.dart';
 import 'package:take_home_project/res/custom_colors.dart';
+import 'package:take_home_project/screens/appointment_screen.dart';
 import 'package:take_home_project/screens/sign_in_screen.dart';
 import 'package:take_home_project/utils/authentication.dart';
 
@@ -21,7 +22,7 @@ class UserInfoScreen extends StatefulWidget {
 
 class UserInfoScreenState extends State<UserInfoScreen> {
   late User _user;
-  final PriceController priceController = Get.put(PriceController());
+  final DataController dataController = Get.put(DataController());
   final CarouselController _controller = CarouselController();
   late List<Widget> imageSliders;
   late List<String> labels;
@@ -52,118 +53,124 @@ class UserInfoScreenState extends State<UserInfoScreen> {
     _current = 0;
     labels = ['Ounce', 'Gram', 'Hundred Gram', 'Thousand Gram'];
     _user = widget._user;
-    priceController.fetchPrice();
+    dataController.fetchPrice();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: CustomColors.primary,
-      appBar: AppBar(
-        elevation: 0,
         backgroundColor: CustomColors.primary,
-        title: Text(
-          _user.displayName!,
-          style: const TextStyle(
-            color: CustomColors.secondary,
-            fontSize: 18,
+        appBar: AppBar(
+          elevation: 0,
+          backgroundColor: CustomColors.primary,
+          title: Text(
+            _user.displayName!,
+            style: const TextStyle(
+              color: CustomColors.secondary,
+              fontSize: 18,
+            ),
           ),
-        ),
-        leading: _user.photoURL != null
-            ? Padding(
-                padding: const EdgeInsets.all(5.0),
-                child: ClipOval(
+          leading: _user.photoURL != null
+              ? Padding(
+                  padding: const EdgeInsets.all(5.0),
+                  child: ClipOval(
+                    child: Material(
+                      color: CustomColors.secondary.withOpacity(0.3),
+                      child: Image.network(
+                        _user.photoURL!,
+                      ),
+                    ),
+                  ),
+                )
+              : ClipOval(
                   child: Material(
                     color: CustomColors.secondary.withOpacity(0.3),
-                    child: Image.network(
-                      _user.photoURL!,
+                    child: const Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Icon(
+                        Icons.person,
+                        size: 60,
+                        color: CustomColors.secondary,
+                      ),
                     ),
                   ),
                 ),
-              )
-            : ClipOval(
-                child: Material(
-                  color: CustomColors.secondary.withOpacity(0.3),
-                  child: const Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Icon(
-                      Icons.person,
-                      size: 60,
-                      color: CustomColors.secondary,
-                    ),
+          actions: [
+            IconButton(
+              icon: const Icon(
+                Icons.logout,
+              ),
+              onPressed: () async {
+                await Authentication.signOut(context: context);
+                await Future.delayed(const Duration(seconds: 1));
+                () {
+                  Navigator.of(context).pushReplacement(_routeToSignInScreen());
+                }.call();
+              },
+            )
+          ],
+        ),
+        body: SafeArea(
+          child: Obx(() {
+            if (dataController.isLoadingPrice.value) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            return Column(
+              children: [
+                Expanded(
+                  child: CarouselSlider(
+                    items: List.generate(
+                        dataController.weights.length,
+                        (index) => getScreen(
+                            dataController.weights[index], labels[index])),
+                    carouselController: _controller,
+                    options: CarouselOptions(
+                        height: 800.0,
+                        autoPlay: true,
+                        enlargeCenterPage: true,
+                        aspectRatio: 2.0,
+                        autoPlayCurve: Curves.easeInBack,
+                        viewportFraction: 1.0,
+                        onPageChanged: (index, reason) {
+                          setState(() {
+                            _current = index;
+                          });
+                        }),
                   ),
                 ),
-              ),
-        actions: [
-          IconButton(
-            icon: const Icon(
-              Icons.logout,
-            ),
-            onPressed: () async {
-              await Authentication.signOut(context: context);
-              await Future.delayed(const Duration(seconds: 1));
-              () {
-                Navigator.of(context).pushReplacement(_routeToSignInScreen());
-              }.call();
-            },
-          )
-        ],
-      ),
-      body: SafeArea(
-        child: Obx(() {
-          if (priceController.isLoadingPrice.value) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          return Column(
-            children: [
-              Expanded(
-                child: CarouselSlider(
-                  items: List.generate(
-                      priceController.weights.length,
-                      (index) => getScreen(
-                          priceController.weights[index], labels[index])),
-                  carouselController: _controller,
-                  options: CarouselOptions(
-                      height: 800.0,
-                      autoPlay: true,
-                      enlargeCenterPage: true,
-                      aspectRatio: 2.0,
-                      autoPlayCurve: Curves.easeInBack,
-                      viewportFraction: 1.0,
-                      onPageChanged: (index, reason) {
-                        setState(() {
-                          _current = index;
-                        });
-                      }),
-                ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: labels.asMap().entries.map((entry) {
-                  return GestureDetector(
-                    onTap: () => _controller.animateToPage(entry.key),
-                    child: Container(
-                      width: 12.0,
-                      height: 12.0,
-                      margin: const EdgeInsets.symmetric(
-                          vertical: 8.0, horizontal: 4.0),
-                      decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: (Theme.of(context).brightness ==
-                                      Brightness.dark
-                                  ? Colors.white
-                                  : Colors.black)
-                              .withOpacity(_current == entry.key ? 0.9 : 0.4)),
-                    ),
-                  );
-                }).toList(),
-              )
-            ],
-          );
-        }),
-      ),
-    );
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: labels.asMap().entries.map((entry) {
+                    return GestureDetector(
+                      onTap: () => _controller.animateToPage(entry.key),
+                      child: Container(
+                        width: 12.0,
+                        height: 12.0,
+                        margin: const EdgeInsets.symmetric(
+                            vertical: 8.0, horizontal: 4.0),
+                        decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color:
+                                (Theme.of(context).brightness == Brightness.dark
+                                        ? Colors.white
+                                        : Colors.black)
+                                    .withOpacity(
+                                        _current == entry.key ? 0.9 : 0.4)),
+                      ),
+                    );
+                  }).toList(),
+                )
+              ],
+            );
+          }),
+        ),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () => Get.to(() => const AppointmentScreen()),
+          label: const Text('Appointment'),
+          icon: const Icon(Icons.calendar_month_sharp),
+          backgroundColor: CustomColors.primary,
+        ));
   }
 
   Widget getScreen(Weight weight, String label) {
