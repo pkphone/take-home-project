@@ -1,4 +1,4 @@
-package com.example.take_home_project
+package com.ppk.thp
 
 import io.flutter.embedding.android.FlutterActivity
 

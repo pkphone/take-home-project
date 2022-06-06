@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "60750958916",
+    "project_id": "take-home-project-767bb",
+    "storage_bucket": "take-home-project-767bb.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:60750958916:android:bbd16830f46d9aae668711",
+        "android_client_info": {
+          "package_name": "com.ppk.thp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "60750958916-3op1uujro5qfc7mto6dbg0kvg0e718s2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAzaL9bxzuG62yJ8zo0Zl2wVQsofemT4Sg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "60750958916-3op1uujro5qfc7mto6dbg0kvg0e718s2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
