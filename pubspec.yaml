@@ -33,6 +33,10 @@ dependencies:
   firebase_auth: ^1.0.1
   google_sign_in: ^5.0.0
   change_app_package_name:
+  json_annotation:
+  get:
+  http:
+  carousel_slider: ^4.0.0
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -42,6 +46,8 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  build_runner:
+  json_serializable:
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

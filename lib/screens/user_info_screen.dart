@@ -1,9 +1,12 @@
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:take_home_project/controller/price_controller.dart';
+import 'package:take_home_project/model/weight.dart';
 import 'package:take_home_project/res/custom_colors.dart';
 import 'package:take_home_project/screens/sign_in_screen.dart';
 import 'package:take_home_project/utils/authentication.dart';
-import 'package:take_home_project/widgets/app_bar_title.dart';
 
 class UserInfoScreen extends StatefulWidget {
   const UserInfoScreen({Key? key, required User user})
@@ -18,7 +21,11 @@ class UserInfoScreen extends StatefulWidget {
 
 class UserInfoScreenState extends State<UserInfoScreen> {
   late User _user;
-  bool _isSigningOut = false;
+  final PriceController priceController = Get.put(PriceController());
+  final CarouselController _controller = CarouselController();
+  late List<Widget> imageSliders;
+  late List<String> labels;
+  late int _current;
 
   Route _routeToSignInScreen() {
     return PageRouteBuilder(
@@ -42,8 +49,10 @@ class UserInfoScreenState extends State<UserInfoScreen> {
 
   @override
   void initState() {
+    _current = 0;
+    labels = ['Ounce', 'Gram', 'Hundred Gram', 'Thousand Gram'];
     _user = widget._user;
-
+    priceController.fetchPrice();
     super.initState();
   }
 
@@ -54,122 +63,205 @@ class UserInfoScreenState extends State<UserInfoScreen> {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: CustomColors.primary,
-        title: const AppBarTitle(),
+        title: Text(
+          _user.displayName!,
+          style: const TextStyle(
+            color: CustomColors.secondary,
+            fontSize: 18,
+          ),
+        ),
+        leading: _user.photoURL != null
+            ? Padding(
+                padding: const EdgeInsets.all(5.0),
+                child: ClipOval(
+                  child: Material(
+                    color: CustomColors.secondary.withOpacity(0.3),
+                    child: Image.network(
+                      _user.photoURL!,
+                    ),
+                  ),
+                ),
+              )
+            : ClipOval(
+                child: Material(
+                  color: CustomColors.secondary.withOpacity(0.3),
+                  child: const Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Icon(
+                      Icons.person,
+                      size: 60,
+                      color: CustomColors.secondary,
+                    ),
+                  ),
+                ),
+              ),
+        actions: [
+          IconButton(
+            icon: const Icon(
+              Icons.logout,
+            ),
+            onPressed: () async {
+              await Authentication.signOut(context: context);
+              await Future.delayed(const Duration(seconds: 1));
+              () {
+                Navigator.of(context).pushReplacement(_routeToSignInScreen());
+              }.call();
+            },
+          )
+        ],
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.only(
-            left: 16.0,
-            right: 16.0,
-            bottom: 20.0,
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+        child: Obx(() {
+          if (priceController.isLoadingPrice.value) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          return Column(
             children: [
-              Row(),
-              _user.photoURL != null
-                  ? ClipOval(
-                      child: Material(
-                        color: CustomColors.secondary.withOpacity(0.3),
-                        child: Image.network(
-                          _user.photoURL!,
-                          fit: BoxFit.fitHeight,
-                        ),
-                      ),
-                    )
-                  : ClipOval(
-                      child: Material(
-                        color: CustomColors.secondary.withOpacity(0.3),
-                        child: const Padding(
-                          padding: EdgeInsets.all(16.0),
-                          child: Icon(
-                            Icons.person,
-                            size: 60,
-                            color: CustomColors.secondary,
-                          ),
-                        ),
-                      ),
-                    ),
-              const SizedBox(height: 16.0),
-              const Text(
-                'Hello',
-                style: TextStyle(
-                  color: CustomColors.secondary,
-                  fontSize: 26,
-                ),
-              ),
-              const SizedBox(height: 8.0),
-              Text(
-                _user.displayName!,
-                style: const TextStyle(
-                  color: CustomColors.secondary,
-                  fontSize: 26,
-                ),
-              ),
-              const SizedBox(height: 8.0),
-              Text(
-                '( ${_user.email!} )',
-                style: const TextStyle(
-                  color: CustomColors.secondary,
-                  fontSize: 20,
-                  letterSpacing: 0.5,
-                ),
-              ),
-              const SizedBox(height: 24.0),
-              Text(
-                'You are now signed in using your Google account. To sign out of your account click the "Sign Out" button below.',
-                style: TextStyle(
-                    color: CustomColors.secondary.withOpacity(0.8),
-                    fontSize: 14,
-                    letterSpacing: 0.2),
-              ),
-              const SizedBox(height: 16.0),
-              _isSigningOut
-                  ? const CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    )
-                  : ElevatedButton(
-                      style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all(
-                          Colors.redAccent,
-                        ),
-                        shape: MaterialStateProperty.all(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                      ),
-                      onPressed: () async {
+              Expanded(
+                child: CarouselSlider(
+                  items: List.generate(
+                      priceController.weights.length,
+                      (index) => getScreen(
+                          priceController.weights[index], labels[index])),
+                  carouselController: _controller,
+                  options: CarouselOptions(
+                      height: 800.0,
+                      autoPlay: true,
+                      enlargeCenterPage: true,
+                      aspectRatio: 2.0,
+                      autoPlayCurve: Curves.easeInBack,
+                      viewportFraction: 1.0,
+                      onPageChanged: (index, reason) {
                         setState(() {
-                          _isSigningOut = true;
+                          _current = index;
                         });
-                        await Authentication.signOut(context: context);
-                        setState(() {
-                          _isSigningOut = false;
-                        });
-                        await Future.delayed(const Duration(seconds: 1));
-                        () {
-                          Navigator.of(context)
-                              .pushReplacement(_routeToSignInScreen());
-                        }.call();
-                      },
-                      child: const Padding(
-                        padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
-                        child: Text(
-                          'Sign Out',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            letterSpacing: 2,
-                          ),
-                        ),
-                      ),
+                      }),
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: labels.asMap().entries.map((entry) {
+                  return GestureDetector(
+                    onTap: () => _controller.animateToPage(entry.key),
+                    child: Container(
+                      width: 12.0,
+                      height: 12.0,
+                      margin: const EdgeInsets.symmetric(
+                          vertical: 8.0, horizontal: 4.0),
+                      decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: (Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? Colors.white
+                                  : Colors.black)
+                              .withOpacity(_current == entry.key ? 0.9 : 0.4)),
                     ),
+                  );
+                }).toList(),
+              )
+            ],
+          );
+        }),
+      ),
+    );
+  }
+
+  Widget getScreen(Weight weight, String label) {
+    return Column(
+      children: [
+        Expanded(
+          flex: 1,
+          child: Stack(
+            children: [
+              Image.asset(
+                'assets/gold.jpeg',
+                width: MediaQuery.of(context).size.width,
+                fit: BoxFit.cover,
+              ),
+              Center(
+                child: Container(
+                  padding: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: CustomColors.primary,
+                  ),
+                  child: Text(
+                    '${weight.gold} \n Gold',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                        fontSize: 20, color: CustomColors.secondary),
+                  ),
+                ),
+              )
             ],
           ),
         ),
-      ),
+        Expanded(
+          flex: 1,
+          child: Stack(
+            children: [
+              Image.asset(
+                'assets/platinum.jpeg',
+                width: MediaQuery.of(context).size.width,
+                fit: BoxFit.cover,
+              ),
+              Center(
+                child: Container(
+                  padding: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: CustomColors.primary,
+                  ),
+                  child: Text(
+                    '${weight.platinum} \n Platinum',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                        fontSize: 20, color: CustomColors.secondary),
+                  ),
+                ),
+              )
+            ],
+          ),
+        ),
+        Expanded(
+          flex: 1,
+          child: Stack(
+            children: [
+              Image.asset(
+                'assets/silver.jpeg',
+                width: MediaQuery.of(context).size.width,
+                fit: BoxFit.cover,
+              ),
+              Center(
+                child: Container(
+                  padding: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: CustomColors.primary,
+                  ),
+                  child: Text(
+                    '${weight.silver} \n Silver',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                        fontSize: 20, color: CustomColors.secondary),
+                  ),
+                ),
+              )
+            ],
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.only(top: 10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: CustomColors.primary,
+          ),
+          child: Text(
+            label,
+            style: const TextStyle(fontSize: 20, color: CustomColors.secondary),
+          ),
+        )
+      ],
     );
   }
 
