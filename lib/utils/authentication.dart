@@ -40,7 +40,7 @@ class Authentication {
     return firebaseApp;
   }
 
-  // Implement Google Sign In
+  // Implement Google sign in
   static Future<User?> signInWithGoogle({required BuildContext context}) async {
     FirebaseAuth auth = FirebaseAuth.instance;
     User? user;
@@ -119,7 +119,7 @@ class Authentication {
     return user;
   }
 
-  // Implement Google Sign Out
+  // Implement Google sign out
   static Future<void> signOut({required BuildContext context}) async {
     final GoogleSignIn googleSignIn = GoogleSignIn();
 

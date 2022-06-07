@@ -58,7 +58,7 @@ class UserInfoScreenState extends State<UserInfoScreen> {
       'Thousand Gram'
     ]; // list of weights
     _user = widget._user;
-    dataController.fetchPrice();
+    dataController.fetchData(); // fetch data from the server
     super.initState();
   }
 
@@ -107,10 +107,12 @@ class UserInfoScreenState extends State<UserInfoScreen> {
               Icons.logout,
             ),
             onPressed: () async {
+              // sign out process
               await Authentication.signOut(context: context);
               await Future.delayed(const Duration(seconds: 1));
               () {
-                Navigator.of(context).pushReplacement(_routeToSignInScreen());
+                Navigator.of(context).pushReplacement(
+                    _routeToSignInScreen()); // back to sign in screen
               }.call();
             },
           )
@@ -119,8 +121,10 @@ class UserInfoScreenState extends State<UserInfoScreen> {
       body: SafeArea(
         child: Obx(() {
           if (dataController.isLoadingPrice.value) {
+            // show loading
             return const Center(child: CircularProgressIndicator());
           }
+          // show carousel slider
           return Column(
             children: [
               Expanded(
@@ -144,6 +148,7 @@ class UserInfoScreenState extends State<UserInfoScreen> {
                       }),
                 ),
               ),
+              // show carousel position
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: labels.asMap().entries.map((entry) {
@@ -165,6 +170,7 @@ class UserInfoScreenState extends State<UserInfoScreen> {
                   );
                 }).toList(),
               ),
+              // show appointment view
               InkWell(
                 onTap: (() => Get.to(() => const AppointmentScreen())),
                 child: Container(
@@ -193,6 +199,7 @@ class UserInfoScreenState extends State<UserInfoScreen> {
     );
   }
 
+  // show gold, platinum and silver image with the price according to the weight
   Widget getScreen(Weight weight, String label) {
     return Column(
       children: [
@@ -294,6 +301,7 @@ class UserInfoScreenState extends State<UserInfoScreen> {
     );
   }
 
+  // delay for transition
   Future<void> myAsyncMethod(
       BuildContext context, VoidCallback onSuccess) async {
     await Future.delayed(const Duration(seconds: 2));

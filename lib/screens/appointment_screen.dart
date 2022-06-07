@@ -67,7 +67,7 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
                   child: Column(
                     children: [
                       const SizedBox(height: 10),
-                      Text('Book on $_bookDate'),
+                      Text('Book on $_bookDate'), // show selected date
                       Expanded(
                         child: SingleChildScrollView(
                           child: Column(
@@ -83,6 +83,7 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
         ));
   }
 
+  // handle date picker action
   void _onSelectionChanged(DateRangePickerSelectionChangedArgs args) {
     setState(() {
       _selectedDate = args.value.toString();

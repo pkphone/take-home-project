@@ -25,7 +25,7 @@ class SignInScreenState extends State<SignInScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.max,
             children: [
-              Row(),
+              // show app logo and text
               Expanded(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -49,6 +49,7 @@ class SignInScreenState extends State<SignInScreen> {
                   ],
                 ),
               ),
+              // init firebase and checking state
               FutureBuilder(
                 future: Authentication.initializeFirebase(context: context),
                 builder: (context, snapshot) {

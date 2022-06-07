@@ -31,6 +31,7 @@ class GoogleSignInButtonState extends State<GoogleSignInButton> {
                 ),
               ),
               onPressed: () async {
+                // sign in process
                 setState(() {
                   _isSigningIn = true;
                 });

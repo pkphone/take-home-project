@@ -11,7 +11,7 @@ class DataController extends GetxController {
   var slots = <Data>[].obs;
 
   // fetch price and appointment slots
-  Future fetchPrice() async {
+  Future fetchData() async {
     try {
       isLoadingPrice(true);
       weights.clear();
