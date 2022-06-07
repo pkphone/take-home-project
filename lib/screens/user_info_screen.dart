@@ -60,117 +60,132 @@ class UserInfoScreenState extends State<UserInfoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: CustomColors.primary,
+      appBar: AppBar(
+        elevation: 0,
         backgroundColor: CustomColors.primary,
-        appBar: AppBar(
-          elevation: 0,
-          backgroundColor: CustomColors.primary,
-          title: Text(
-            _user.displayName!,
-            style: const TextStyle(
-              color: CustomColors.secondary,
-              fontSize: 18,
-            ),
+        title: Text(
+          _user.displayName!,
+          style: const TextStyle(
+            color: CustomColors.secondary,
+            fontSize: 18,
           ),
-          leading: _user.photoURL != null
-              ? Padding(
-                  padding: const EdgeInsets.all(5.0),
-                  child: ClipOval(
-                    child: Material(
-                      color: CustomColors.secondary.withOpacity(0.3),
-                      child: Image.network(
-                        _user.photoURL!,
-                      ),
-                    ),
-                  ),
-                )
-              : ClipOval(
+        ),
+        leading: _user.photoURL != null
+            ? Padding(
+                padding: const EdgeInsets.all(5.0),
+                child: ClipOval(
                   child: Material(
                     color: CustomColors.secondary.withOpacity(0.3),
-                    child: const Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: Icon(
-                        Icons.person,
-                        size: 60,
-                        color: CustomColors.secondary,
-                      ),
+                    child: Image.network(
+                      _user.photoURL!,
                     ),
                   ),
                 ),
-          actions: [
-            IconButton(
-              icon: const Icon(
-                Icons.logout,
-              ),
-              onPressed: () async {
-                await Authentication.signOut(context: context);
-                await Future.delayed(const Duration(seconds: 1));
-                () {
-                  Navigator.of(context).pushReplacement(_routeToSignInScreen());
-                }.call();
-              },
-            )
-          ],
-        ),
-        body: SafeArea(
-          child: Obx(() {
-            if (dataController.isLoadingPrice.value) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            return Column(
-              children: [
-                Expanded(
-                  child: CarouselSlider(
-                    items: List.generate(
-                        dataController.weights.length,
-                        (index) => getScreen(
-                            dataController.weights[index], labels[index])),
-                    carouselController: _controller,
-                    options: CarouselOptions(
-                        height: 800.0,
-                        autoPlay: true,
-                        enlargeCenterPage: true,
-                        aspectRatio: 2.0,
-                        autoPlayCurve: Curves.easeInBack,
-                        viewportFraction: 1.0,
-                        onPageChanged: (index, reason) {
-                          setState(() {
-                            _current = index;
-                          });
-                        }),
+              )
+            : ClipOval(
+                child: Material(
+                  color: CustomColors.secondary.withOpacity(0.3),
+                  child: const Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Icon(
+                      Icons.person,
+                      size: 60,
+                      color: CustomColors.secondary,
+                    ),
                   ),
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: labels.asMap().entries.map((entry) {
-                    return GestureDetector(
-                      onTap: () => _controller.animateToPage(entry.key),
-                      child: Container(
-                        width: 12.0,
-                        height: 12.0,
-                        margin: const EdgeInsets.symmetric(
-                            vertical: 8.0, horizontal: 4.0),
-                        decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color:
-                                (Theme.of(context).brightness == Brightness.dark
-                                        ? Colors.white
-                                        : Colors.black)
-                                    .withOpacity(
-                                        _current == entry.key ? 0.9 : 0.4)),
-                      ),
-                    );
-                  }).toList(),
-                )
-              ],
-            );
-          }),
-        ),
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: () => Get.to(() => const AppointmentScreen()),
-          label: const Text('Appointment'),
-          icon: const Icon(Icons.calendar_month_sharp),
-          backgroundColor: CustomColors.primary,
-        ));
+              ),
+        actions: [
+          IconButton(
+            icon: const Icon(
+              Icons.logout,
+            ),
+            onPressed: () async {
+              await Authentication.signOut(context: context);
+              await Future.delayed(const Duration(seconds: 1));
+              () {
+                Navigator.of(context).pushReplacement(_routeToSignInScreen());
+              }.call();
+            },
+          )
+        ],
+      ),
+      body: SafeArea(
+        child: Obx(() {
+          if (dataController.isLoadingPrice.value) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          return Column(
+            children: [
+              Expanded(
+                child: CarouselSlider(
+                  items: List.generate(
+                      dataController.weights.length,
+                      (index) => getScreen(
+                          dataController.weights[index], labels[index])),
+                  carouselController: _controller,
+                  options: CarouselOptions(
+                      height: 800.0,
+                      autoPlay: true,
+                      enlargeCenterPage: true,
+                      aspectRatio: 2.0,
+                      autoPlayCurve: Curves.easeInBack,
+                      viewportFraction: 1.0,
+                      onPageChanged: (index, reason) {
+                        setState(() {
+                          _current = index;
+                        });
+                      }),
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: labels.asMap().entries.map((entry) {
+                  return GestureDetector(
+                    onTap: () => _controller.animateToPage(entry.key),
+                    child: Container(
+                      width: 12.0,
+                      height: 12.0,
+                      margin: const EdgeInsets.symmetric(
+                          vertical: 8.0, horizontal: 4.0),
+                      decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: (Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? Colors.white
+                                  : Colors.black)
+                              .withOpacity(_current == entry.key ? 0.9 : 0.4)),
+                    ),
+                  );
+                }).toList(),
+              ),
+              InkWell(
+                onTap: (() => Get.to(() => const AppointmentScreen())),
+                child: Container(
+                  height: 60,
+                  color: CustomColors.secondary,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(Icons.calendar_month_sharp,
+                          color: CustomColors.deepBlue),
+                      SizedBox(width: 5),
+                      Text(
+                        'Place an appointment',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            fontSize: 20, color: CustomColors.deepBlue),
+                      )
+                    ],
+                  ),
+                ),
+              )
+            ],
+          );
+        }),
+      ),
+    );
   }
 
   Widget getScreen(Weight weight, String label) {
@@ -193,7 +208,7 @@ class UserInfoScreenState extends State<UserInfoScreen> {
                     color: CustomColors.primary,
                   ),
                   child: Text(
-                    '${weight.gold} \n Gold',
+                    '\$${weight.gold} \n Gold',
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                         fontSize: 20, color: CustomColors.secondary),
@@ -220,7 +235,7 @@ class UserInfoScreenState extends State<UserInfoScreen> {
                     color: CustomColors.primary,
                   ),
                   child: Text(
-                    '${weight.platinum} \n Platinum',
+                    '\$${weight.platinum} \n Platinum',
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                         fontSize: 20, color: CustomColors.secondary),
@@ -247,7 +262,7 @@ class UserInfoScreenState extends State<UserInfoScreen> {
                     color: CustomColors.primary,
                   ),
                   child: Text(
-                    '${weight.silver} \n Silver',
+                    '\$${weight.silver} \n Silver',
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                         fontSize: 20, color: CustomColors.secondary),
@@ -257,15 +272,17 @@ class UserInfoScreenState extends State<UserInfoScreen> {
             ],
           ),
         ),
+        const SizedBox(height: 10),
         Container(
-          padding: const EdgeInsets.only(top: 10),
+          padding: const EdgeInsets.all(5),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
-            color: CustomColors.primary,
+            color: CustomColors.secondary,
           ),
           child: Text(
             label,
-            style: const TextStyle(fontSize: 20, color: CustomColors.secondary),
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 20, color: CustomColors.primary),
           ),
         )
       ],

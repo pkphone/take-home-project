@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:take_home_project/controller/data_controller.dart';
 import 'package:take_home_project/res/custom_colors.dart';
+import 'package:intl/intl.dart';
 
 class AppointmentScreen extends StatefulWidget {
   const AppointmentScreen({Key? key}) : super(key: key);
@@ -14,10 +15,12 @@ class AppointmentScreen extends StatefulWidget {
 class _AppointmentScreenState extends State<AppointmentScreen> {
   final dataController = Get.find<DataController>();
   late String _selectedDate;
+  late String _bookDate;
 
   @override
   void initState() {
     _selectedDate = '';
+    _bookDate = '';
     super.initState();
   }
 
@@ -63,11 +66,13 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
                   child: Column(
                     children: [
                       const SizedBox(height: 10),
-                      const Text('Booking time'),
-                      SingleChildScrollView(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: _renderTime(),
+                      Text('Book on $_bookDate'),
+                      Expanded(
+                        child: SingleChildScrollView(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: _renderTime(),
+                          ),
                         ),
                       ),
                     ],
@@ -80,6 +85,8 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
   void _onSelectionChanged(DateRangePickerSelectionChangedArgs args) {
     setState(() {
       _selectedDate = args.value.toString();
+      _bookDate =
+          DateFormat('EEEE, d MMM, yyyy').format(DateTime.parse(_selectedDate));
     });
   }
 

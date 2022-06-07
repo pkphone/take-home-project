@@ -38,6 +38,7 @@ dependencies:
   http:
   carousel_slider: ^4.0.0
   syncfusion_flutter_datepicker: ^20.1.58
+  intl:
 
 
   # The following adds the Cupertino Icons font to your application.
