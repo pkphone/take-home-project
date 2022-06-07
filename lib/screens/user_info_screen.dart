@@ -51,7 +51,12 @@ class UserInfoScreenState extends State<UserInfoScreen> {
   @override
   void initState() {
     _current = 0;
-    labels = ['Ounce', 'Gram', 'Hundred Gram', 'Thousand Gram'];
+    labels = [
+      'Ounce',
+      'Gram',
+      'Hundred Gram',
+      'Thousand Gram'
+    ]; // list of weights
     _user = widget._user;
     dataController.fetchPrice();
     super.initState();

@@ -36,6 +36,7 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
                 child: SfDateRangePicker(
                     onSelectionChanged: _onSelectionChanged,
                     selectableDayPredicate: (DateTime dateTime) {
+                      // disable and enable date according to the slots
                       for (int i = 0; i < dataController.slots.length; i++) {
                         List<String> ymd =
                             dataController.slots[i].date.split('-');
@@ -85,14 +86,15 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
   void _onSelectionChanged(DateRangePickerSelectionChangedArgs args) {
     setState(() {
       _selectedDate = args.value.toString();
-      _bookDate =
-          DateFormat('EEEE, d MMM, yyyy').format(DateTime.parse(_selectedDate));
+      _bookDate = DateFormat('EEEE, d MMM, yyyy').format(DateTime.parse(
+          _selectedDate)); // convert date to Book on Tuesday, June 7, 2022 format
     });
   }
 
+  // render list of available time
   _renderTime() {
     List<Widget> widgets = [];
-
+    // extract from the slots and get the time
     for (int i = 0; i < dataController.slots.length; i++) {
       List<String> dateSplit = _selectedDate.split(' ');
       if (dateSplit[0] == dataController.slots[i].date) {
